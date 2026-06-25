@@ -1,0 +1,1215 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>K-Beauty Trends</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #f8f9fb; --surface: #fff; --border: #e8eaed;
+  --text: #1a1a2e; --muted: #8a929e; --accent: #2563eb;
+}
+body { background: var(--bg); color: var(--text); font-family: 'Inter','Apple SD Gothic Neo',-apple-system,sans-serif; font-size: 13px; }
+
+/* NAV */
+.top-nav { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 32px; display: flex; align-items: center; justify-content: space-between; }
+.nav-tabs { display: flex; }
+.nav-tab { padding: 16px 20px; font-size: 13px; font-weight: 500; cursor: pointer; border-bottom: 2px solid transparent; color: var(--muted); transition: all .15s; white-space: nowrap; }
+.nav-tab:hover { color: var(--text); }
+.nav-tab.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+.nav-badge { font-size: 10px; font-weight: 700; letter-spacing: .8px; text-transform: uppercase; border: 1px solid var(--border); color: var(--muted); padding: 4px 10px; border-radius: 4px; }
+
+/* HEADER */
+.header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 16px 32px 12px; }
+.header h1 { font-size: 20px; font-weight: 700; letter-spacing: -.5px; }
+.header p { font-size: 11px; color: var(--muted); margin-top: 3px; }
+
+/* FILTER */
+.filter-bar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 10px 32px; display: flex; align-items: flex-end; gap: 14px; flex-wrap: wrap; }
+.ctrl { display: flex; flex-direction: column; gap: 3px; }
+.ctrl label { font-size: 10px; color: var(--muted); font-weight: 500; letter-spacing: .4px; text-transform: uppercase; }
+select, input[type=date] { background: var(--surface); border: 1px solid var(--border); color: var(--text); padding: 6px 10px; border-radius: 6px; font-size: 12px; cursor: pointer; outline: none; }
+select:focus, input[type=date]:focus { border-color: var(--accent); }
+.date-row { display: flex; align-items: center; gap: 6px; }
+.quick-btns { display: flex; gap: 4px; }
+.qbtn { padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 500; cursor: pointer; border: 1px solid var(--border); background: var(--surface); color: var(--muted); transition: all .15s; }
+.qbtn:hover { border-color: var(--accent); color: var(--accent); }
+.qbtn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+.no-data-bar { display: none; font-size: 11px; color: #dc2626; background: #fef2f2; border: 1px solid #fecaca; padding: 6px 12px; border-radius: 6px; align-self: center; }
+
+/* GROUP TABS */
+.group-tabs { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 32px; display: flex; overflow-x: auto; }
+.gtab { padding: 10px 16px; font-size: 12px; font-weight: 500; cursor: pointer; border-bottom: 2px solid transparent; color: var(--muted); transition: all .15s; white-space: nowrap; }
+.gtab:hover { color: var(--text); }
+.gtab.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+
+/* CONTENT */
+.content { padding: 16px 32px; display: flex; flex-direction: column; gap: 12px; }
+.section-label { font-size: 12px; font-weight: 600; color: var(--text); margin-bottom: 8px; }
+
+/* RANKING */
+.ranking-row { display: grid; grid-template-columns: repeat(5,1fr); gap: 8px; }
+.rank-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; display: flex; align-items: center; gap: 10px; }
+.rank-num { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #fff; flex-shrink: 0; }
+.rank-kw { font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rank-pct { font-size: 13px; font-weight: 700; margin-top: 1px; }
+
+/* SIGNAL */
+.signal-box { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px; }
+.signal-title { font-size: 10px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 8px; }
+.signal-item { font-size: 12px; color: #4a5568; line-height: 1.5; display: flex; gap: 8px; margin-bottom: 4px; }
+
+/* CHART */
+.chart-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; }
+.chart-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.chart-title-txt { font-size: 13px; font-weight: 600; }
+.chart-dl { background: none; border: 1px solid var(--border); border-radius: 6px; padding: 4px 8px; cursor: pointer; color: var(--muted); font-size: 11px; }
+
+/* CHIPS */
+.chips-row { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+.chip { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px 4px 8px; border-radius: 20px; font-size: 11px; font-weight: 500; border: 1px solid; cursor: pointer; transition: all .12s; }
+.chip-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.chip-x { margin-left: 2px; font-size: 10px; opacity: 0.6; }
+.chip-add { display: inline-flex; align-items: center; gap: 4px; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 500; border: 1px dashed var(--border); background: transparent; color: var(--muted); cursor: pointer; transition: all .12s; }
+.chip-add:hover { border-color: var(--accent); color: var(--accent); }
+
+/* CHART WRAP */
+.chart-wrap { position: relative; height: 320px; }
+
+/* SIDE PANEL */
+.panel-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.3); z-index: 100; }
+.panel-overlay.open { display: block; }
+.side-panel { position: fixed; top: 0; right: -400px; width: 360px; height: 100vh; background: var(--surface); border-left: 1px solid var(--border); z-index: 101; display: flex; flex-direction: column; transition: right .25s ease; box-shadow: -4px 0 20px rgba(0,0,0,0.08); }
+.side-panel.open { right: 0; }
+.panel-header { padding: 18px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+.panel-title { font-size: 15px; font-weight: 700; }
+.panel-close { background: none; border: none; font-size: 18px; cursor: pointer; color: var(--muted); padding: 2px 6px; }
+.panel-search { padding: 12px 16px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.panel-search input { width: 100%; border: 1px solid var(--border); border-radius: 6px; padding: 7px 10px; font-size: 12px; outline: none; }
+.panel-search input:focus { border-color: var(--accent); }
+.panel-body { flex: 1; overflow-y: auto; padding: 12px 16px; }
+.panel-group { margin-bottom: 14px; }
+.panel-group-title { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
+.panel-group-count { font-size: 10px; background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 1px 7px; color: var(--muted); }
+.panel-kw-list { display: flex; flex-direction: column; gap: 2px; }
+.panel-kw-item { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 6px; cursor: pointer; transition: background .1s; }
+.panel-kw-item:hover { background: var(--bg); }
+.panel-kw-item input[type=checkbox] { cursor: pointer; accent-color: var(--accent); width: 14px; height: 14px; flex-shrink: 0; }
+.panel-kw-label { font-size: 12px; color: var(--text); flex: 1; }
+.panel-kw-item.disabled { opacity: 0.4; pointer-events: none; }
+.panel-footer { padding: 14px 16px; border-top: 1px solid var(--border); flex-shrink: 0; display: flex; align-items: center; justify-content: space-between; }
+.panel-count-txt { font-size: 11px; color: var(--muted); }
+.panel-count-txt span { color: var(--accent); font-weight: 600; }
+.panel-btns { display: flex; gap: 8px; }
+.btn-reset { padding: 7px 14px; border: 1px solid var(--border); border-radius: 6px; background: transparent; font-size: 12px; cursor: pointer; color: var(--muted); }
+.btn-apply { padding: 7px 16px; border: none; border-radius: 6px; background: var(--accent); color: #fff; font-size: 12px; font-weight: 600; cursor: pointer; }
+
+.state-msg { text-align: center; padding: 32px; color: var(--muted); font-size: 13px; grid-column: 1/-1; }
+.state-msg strong { display: block; color: var(--text); margin-bottom: 4px; font-size: 14px; }
+.footer { padding: 8px 32px 20px; font-size: 11px; color: var(--muted); }
+
+/* NUMBUZIN TAB */
+.nz-page { display: none; }
+.nz-page.active { display: block; }
+.nz-header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 16px 32px 12px; }
+.nz-header h1 { font-size: 20px; font-weight: 700; letter-spacing: -.5px; }
+.nz-header p { font-size: 12px; color: var(--muted); margin-top: 3px; }
+
+.nz-filter { background: var(--surface); border-bottom: 1px solid var(--border); padding: 10px 32px; display: flex; align-items: flex-end; gap: 14px; flex-wrap: wrap; }
+
+.nz-hero { margin: 16px 32px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px 28px; display: grid; grid-template-columns: 1fr 1px 1fr 1px 1fr; gap: 0; }
+.nz-hero-divider { background: var(--border); }
+.nz-hero-item { padding: 0 28px; }
+.nz-hero-item:first-child { padding-left: 0; }
+.nz-hero-item:last-child { padding-right: 0; }
+.nz-hero-label { font-size: 11px; color: var(--muted); font-weight: 500; margin-bottom: 8px; }
+.nz-hero-country { font-size: 28px; font-weight: 700; letter-spacing: -.5px; color: var(--text); line-height: 1.1; }
+.nz-hero-sub { font-size: 12px; color: var(--muted); margin-top: 4px; }
+.nz-hero-change { font-size: 22px; font-weight: 700; color: #059669; margin-top: 2px; }
+.nz-hero-change-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+.nz-main { margin: 0 32px 28px; display: grid; grid-template-columns: 380px 1fr; gap: 16px; }
+
+.nz-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+.nz-card-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 16px; }
+
+/* 랭킹 */
+.rank-bar-item { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.rank-bar-num { font-size: 11px; color: var(--muted); width: 16px; text-align: right; flex-shrink: 0; }
+.rank-bar-name { font-size: 12px; color: var(--text); width: 110px; flex-shrink: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rank-bar-wrap { flex: 1; background: #f1f5f9; border-radius: 3px; height: 6px; overflow: hidden; }
+.rank-bar-fill { height: 100%; background: var(--accent); border-radius: 3px; transition: width .3s; }
+.rank-bar-val { font-size: 11px; color: var(--muted); width: 28px; text-align: right; flex-shrink: 0; }
+
+/* 국가 선택 칩 */
+.nz-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+.nz-chip { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px 4px 8px; border-radius: 20px; font-size: 11px; font-weight: 500; border: 1px solid; cursor: pointer; }
+.nz-chip-x { font-size: 10px; opacity: 0.6; margin-left: 2px; }
+.nz-chip-add { display: inline-flex; align-items: center; gap: 4px; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 500; border: 1px dashed var(--border); background: transparent; color: var(--muted); cursor: pointer; }
+.nz-chip-add:hover { border-color: var(--accent); color: var(--accent); }
+.nz-chart-wrap { position: relative; height: 300px; }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<div class="top-nav">
+  <div class="nav-tabs">
+    <span class="nav-tab active" id="tab-skin" onclick="switchMode('skin')">🌿 Skin Concern</span>
+    <span class="nav-tab" id="tab-ingredient" onclick="switchMode('ingredient')">🧪 Ingredient</span>
+    <span class="nav-tab" id="tab-brand" onclick="switchMode('brand')">✨ Brand</span>
+    <span class="nav-tab" id="tab-numbuzin" onclick="switchMode('numbuzin')">📍 numbuzin</span>
+  </div>
+  <span class="nav-badge">Google Trends · Scaled Index</span>
+</div>
+
+<!-- HEADER -->
+<div class="header">
+  <h1 id="pageTitle">Skin Concern Trends</h1>
+  <p id="subtitle">불러오는 중...</p>
+</div>
+
+<!-- FILTER -->
+<div class="filter-bar">
+  <div class="ctrl">
+    <label>지역</label>
+    <select id="geoSel" onchange="onFilterChange()">
+      <option value="GLOBAL">🌍 Global</option>
+      <option value="US">🇺🇸 United States</option>
+      <option value="CA">🇨🇦 Canada</option>
+      <option value="IN">🇮🇳 India</option>
+      <option value="PH">🇵🇭 Philippines</option>
+      <option value="SG">🇸🇬 Singapore</option>
+      <option value="MY">🇲🇾 Malaysia</option>
+      <option value="AE">🇦🇪 UAE</option>
+      <option value="SA">🇸🇦 Saudi Arabia</option>
+      <option value="KR">🇰🇷 Korea</option>
+      <option value="JP">🇯🇵 Japan</option>
+    </select>
+  </div>
+  <div class="ctrl">
+    <label>기간</label>
+    <div class="date-row">
+      <input type="date" id="dateFrom" onchange="onDateChange()">
+      <span style="color:var(--muted)">~</span>
+      <input type="date" id="dateTo" onchange="onDateChange()">
+    </div>
+  </div>
+  <div class="quick-btns">
+    <button class="qbtn" onclick="setQuick(13)">3개월</button>
+    <button class="qbtn" onclick="setQuick(26)">6개월</button>
+    <button class="qbtn active" id="btnAll" onclick="setQuick(0)">전체</button>
+  </div>
+  <div class="no-data-bar" id="noDataBar">⚠ 해당 지역 데이터 없음 — Colab에서 해당 GEO로 실행해주세요</div>
+</div>
+
+<!-- GROUP TABS (skin only) -->
+<div class="group-tabs" id="groupTabs"></div>
+
+<!-- CONTENT -->
+<div class="content">
+  <div>
+    <div class="section-label" id="rankingLabel">피부 고민 관심도 Top 5</div>
+    <div class="ranking-row" id="rankingRow"><div class="state-msg"><strong>로딩 중...</strong></div></div>
+  </div>
+  <div class="signal-box">
+    <div class="signal-title">주요 시그널</div>
+    <div id="signalList"></div>
+  </div>
+  <div class="chart-card">
+    <div class="chart-top">
+      <span class="chart-title-txt" id="chartTitleTxt">피부 고민 관심도 추이</span>
+      <button class="chart-dl" onclick="dlChart()">↓ 저장</button>
+    </div>
+    <div class="chips-row" id="chipsRow"></div>
+    <div class="chart-wrap"><canvas id="mainChart"></canvas></div>
+  </div>
+</div>
+<div class="footer" id="footer"></div>
+
+<!-- NUMBUZIN PAGE -->
+<div class="nz-page" id="nzPage">
+  <div class="nz-header">
+    <h1>numbuzin 국가별 검색 관심도</h1>
+    <p>국가별 검색 관심도의 규모와 변화를 한눈에 확인하세요.</p>
+  </div>
+
+  <div class="nz-filter">
+    <div class="ctrl">
+      <label>기간</label>
+      <div class="date-row">
+        <input type="date" id="nzFrom" onchange="renderNz()">
+        <span style="color:var(--muted)">~</span>
+        <input type="date" id="nzTo" onchange="renderNz()">
+      </div>
+    </div>
+    <div class="quick-btns">
+      <button class="qbtn" onclick="setNzQuick(13)">3개월</button>
+      <button class="qbtn active" id="nzBtnAll6" onclick="setNzQuick(26)">6개월</button>
+      <button class="qbtn" id="nzBtnAll" onclick="setNzQuick(0)">전체</button>
+    </div>
+  </div>
+
+  <!-- 히어로 카드 -->
+  <div class="nz-hero" id="nzHero">
+    <div class="nz-hero-item">
+      <div class="nz-hero-label">이번 기간 가장 강한 국가</div>
+      <div class="nz-hero-country" id="nzTopCountry">—</div>
+      <div class="nz-hero-sub" id="nzTopSub">—</div>
+    </div>
+    <div class="nz-hero-divider"></div>
+    <div class="nz-hero-item">
+      <div class="nz-hero-label">최근 급상승</div>
+      <div class="nz-hero-country" id="nzRiseCountry">—</div>
+      <div class="nz-hero-change" id="nzRiseChange">—</div>
+      <div class="nz-hero-change-sub" id="nzRiseSub">직전 6주 대비</div>
+    </div>
+    <div class="nz-hero-divider"></div>
+    <div class="nz-hero-item">
+      <div class="nz-hero-label">신규 감지</div>
+      <div class="nz-hero-country" id="nzNewCountry">—</div>
+      <div class="nz-hero-sub" id="nzNewSub">—</div>
+    </div>
+  </div>
+
+  <!-- 메인 2컬럼 -->
+  <div class="nz-main">
+    <!-- 왼쪽: 랭킹 -->
+    <div class="nz-card">
+      <div class="nz-card-title">국가별 관심도 랭킹</div>
+      <div id="nzRanking"></div>
+    </div>
+    <!-- 오른쪽: 추이 -->
+    <div class="nz-card">
+      <div class="nz-card-title">상위 국가 관심도 추이</div>
+      <div class="nz-chips" id="nzChips"></div>
+      <div class="nz-chart-wrap"><canvas id="nzChart"></canvas></div>
+    </div>
+  </div>
+</div>
+
+<!-- SIDE PANEL OVERLAY -->
+<div class="panel-overlay" id="panelOverlay" onclick="closePanel()"></div>
+<div class="side-panel" id="sidePanel">
+  <div class="panel-header">
+    <span class="panel-title">키워드 선택</span>
+    <button class="panel-close" onclick="closePanel()">✕</button>
+  </div>
+  <div class="panel-search">
+    <input type="text" id="panelSearch" placeholder="키워드 검색" oninput="filterPanelList()">
+  </div>
+  <div class="panel-body" id="panelBody"></div>
+  <div class="panel-footer">
+    <span class="panel-count-txt">선택 <span id="panelCountNum">0</span>개</span>
+    <div class="panel-btns">
+      <button class="btn-reset" onclick="resetPanel()">초기화</button>
+      <button class="btn-apply" onclick="applyPanel()">닫기</button>
+    </div>
+  </div>
+</div>
+
+<script>
+var APPS_URL = "https://script.google.com/macros/s/AKfycbztUFJXtPxdaLumxyevGcBXYv8p0Ip_YoE9KJFCYtMVeDz-1vT46JQvL55zD7NFZZV_/exec";
+var BRAND_URL = "https://script.google.com/macros/s/AKfycbwNiGz51VCaz7cTmfLqikDaA20QnUXwkW8QkwnQ2ou82161pGRgs1glN2hm5-r6ROOgCg/exec";
+var MAX_KW = 999;
+
+var PALETTE = [
+  "#2563eb","#10b981","#f59e0b","#8b5cf6","#ef4444",
+  "#06b6d4","#f97316","#ec4899","#84cc16","#6366f1",
+  "#14b8a6","#eab308","#a855f7","#22c55e","#fb923c",
+  "#e11d48","#0ea5e9","#d946ef","#65a30d","#f43f5e",
+  "#7c3aed","#0891b2","#dc2626","#16a34a","#ca8a04",
+  "#4f46e5","#be185d","#0d9488"
+];
+
+var ID_COLS = {"date":1,"geo":1,"timeframe":1,"mode":1,"run_at":1};
+
+var MODES = {
+  skin: {
+    title: "Skin Concern Trends",
+    rankLabel: "피부 고민 관심도 Top 5",
+    chartTitle: "피부 고민 관심도 추이",
+    fixed: null,
+    groups: {
+      "전체": null,
+      "트러블·모공": ["acne","pimples","blackheads","large pores","oily skin"],
+      "색소·톤": ["hyperpigmentation","dark spots","melasma","acne scars","dull skin"],
+      "노화·탄력": ["wrinkles","fine lines","sagging skin","anti-aging"],
+      "수분·장벽": ["dry skin","dehydrated skin","skin barrier","flaky skin"],
+      "민감·진정": ["sensitive skin","redness","rosacea","eczema"],
+      "피부질환·특이": ["skin inflammation","fungal acne","seborrheic dermatitis","sun spots","stretch marks","milia","dark circles"]
+    },
+    panelGroups: {
+      "트러블·모공": ["acne","oily skin","pimples","blackheads","large pores"],
+      "색소·톤": ["hyperpigmentation","dark spots","melasma","acne scars","dull skin"],
+      "노화·탄력": ["wrinkles","fine lines","sagging skin","anti-aging"],
+      "수분·장벽": ["dry skin","dehydrated skin","skin barrier","flaky skin"],
+      "민감·진정": ["sensitive skin","redness","rosacea","eczema"]
+    }
+  },
+  ingredient: {
+    title: "Ingredient Trends",
+    rankLabel: "성분 관심도 Top 5",
+    chartTitle: "성분 관심도 추이",
+    fixed: null,
+    groups: {
+      "전체": null,
+      "재생/노화방지": ["NMN","NAD","exosomes","PDRN","retinal"],
+      "레티노이드·비타민": ["retinol","retinal","vitamin C serum","vitamin E","panthenol"],
+      "미백·톤업": ["tranexamic acid","glutathione","azelaic acid","bakuchiol"],
+      "장벽·진정": ["ceramides","ectoin","madecassoside","snail mucin"],
+      "트러블·모공": ["hypochlorous acid","salicylic acid","glycolic acid","volufiline"],
+      "기초·수분": ["hyaluronic acid","peptides","panthenol","micellar water"]
+    },
+    panelGroups: {
+      "재생/노화방지": ["NMN","NAD","exosomes","PDRN","retinal"],
+      "레티노이드·비타민": ["retinol","retinal","vitamin C serum","vitamin E","panthenol"],
+      "미백·톤업": ["tranexamic acid","glutathione","azelaic acid","bakuchiol"],
+      "장벽·진정": ["ceramides","ectoin","madecassoside","snail mucin"],
+      "트러블·모공": ["hypochlorous acid","salicylic acid","glycolic acid","volufiline"],
+      "기초·수분": ["hyaluronic acid","peptides","panthenol","micellar water"]
+    }
+  },
+  brand: {
+    title: "Brand Trends",
+    rankLabel: "브랜드 관심도 Top 5",
+    chartTitle: "브랜드 관심도 추이",
+    fixed: "numbuzin",
+    groups: {"전체": null},
+    panelGroups: {
+      "전체 브랜드": ["anua","arencia","axisy","Beauty of Joseon","biodance","celimax","cosrx","dalba","dr althea","dr melaxin","epii","eqqualberry","FWEE","haruharuwonder","knockbodycare","ksecret","laneige","medicube","mediheal","mixsoon","numbuzin","roundlab","skin1004","some by mi","sungbooneditor","tage","vtcosmetics"]
+    }
+  },
+  numbuzin: {
+    title: "numbuzin",
+    rankLabel: "numbuzin",
+    chartTitle: "numbuzin",
+    fixed: null,
+    groups: {"전체": null},
+    panelGroups: null
+  }
+};
+
+var state = { mode: "skin", data: {}, keywords: {}, active: {}, group: {} };
+var chartInst = null;
+var panelTempActive = {};
+
+function switchMode(mode) {
+  state.mode = mode;
+  ["skin","ingredient","brand"].forEach(function(m) {
+    document.getElementById("tab-"+m).className = "nav-tab" + (m===mode?" active":"");
+  });
+  var cfg = MODES[mode];
+  document.getElementById("pageTitle").textContent = cfg.title;
+  document.getElementById("chartTitleTxt").textContent = cfg.chartTitle;
+  document.getElementById("rankingLabel").textContent = cfg.rankLabel;
+  document.getElementById("chipsRow").innerHTML = "";
+  document.getElementById("signalList").innerHTML = "";
+  document.getElementById("rankingRow").innerHTML = "<div class='state-msg'><strong>로딩 중...</strong></div>";
+  if (chartInst) { chartInst.destroy(); chartInst = null; }
+  if (mode === "numbuzin") {
+    document.getElementById("nzPage").classList.add("active");
+    document.querySelector(".content").style.display = "none";
+    document.getElementById("groupTabs").style.display = "none";
+    document.getElementById("filter-bar-main") && (document.getElementById("filter-bar-main").style.display="none");
+    initNz();
+    return;
+  } else {
+    document.getElementById("nzPage").classList.remove("active");
+    document.querySelector(".content").style.display = "flex";
+    document.getElementById("groupTabs").style.display = "flex";
+  }
+  if (!state.data[mode]) { loadData(mode); }
+  else { state.group[mode]="전체"; setTop5(mode); buildTabs(mode); render(); }
+}
+
+// ── NUMBUZIN TAB LOGIC ──────────────────────────────────
+var nzData = {};   // { "US": [{date, val}, ...], "CA": [...] }
+var nzActiveCountries = ["GLOBAL"];
+var nzChartInst = null;
+
+var GEO_NAMES = {
+  "GLOBAL":"Global","US":"United States","CA":"Canada","IN":"India",
+  "PH":"Philippines","SG":"Singapore","MY":"Malaysia","AE":"UAE","SA":"Saudi Arabia",
+  "KR":"South Korea","JP":"Japan","MX":"Mexico","BR":"Brazil","GB":"United Kingdom",
+  "AU":"Australia","FR":"France","DE":"Germany","TH":"Thailand","VN":"Vietnam","ID":"Indonesia"
+};
+
+function initNz() {
+  if (Object.keys(nzData).length) { renderNz(); return; }
+  // brand_scaled_wide에서 numbuzin 컬럼만 추출
+  fetch(APPS_URL + "?mode=brand")
+    .then(function(r) { return r.json(); })
+    .then(function(json) {
+      if (json.error) throw new Error(json.error);
+      // geo별로 그룹핑
+      json.forEach(function(row) {
+        var geo = row.geo || "GLOBAL";
+        var date = normalizeDate(row.date);
+        var val = parseFloat(row["numbuzin"]) || 0;
+        if (!nzData[geo]) nzData[geo] = [];
+        nzData[geo].push({ date: date, val: val });
+      });
+      // 날짜 정렬
+      Object.keys(nzData).forEach(function(geo) {
+        nzData[geo].sort(function(a,b) { return a.date < b.date ? -1 : 1; });
+      });
+      // 기본 국가 설정 (데이터 있는 국가 중 Top 4)
+      var geos = Object.keys(nzData);
+      nzActiveCountries = geos.slice(0, 4);
+      // 날짜 초기화 (6개월)
+      var allDates = [];
+      Object.values(nzData).forEach(function(arr) { arr.forEach(function(r) { allDates.push(r.date); }); });
+      allDates.sort();
+      if (allDates.length) {
+        var last = allDates[allDates.length-1];
+        document.getElementById("nzTo").value = last;
+        var d = new Date(last); d.setDate(d.getDate()-26*7);
+        document.getElementById("nzFrom").value = d.toISOString().slice(0,10);
+      }
+      renderNz();
+    })
+    .catch(function(e) {
+      document.getElementById("nzRanking").innerHTML = "<div style='color:var(--muted);font-size:12px;padding:20px'>데이터 없음 — Colab에서 brand 모드로 수집해주세요.</div>";
+    });
+}
+
+function getNzFiltered(geo) {
+  var from = document.getElementById("nzFrom").value;
+  var to = document.getElementById("nzTo").value;
+  return (nzData[geo]||[]).filter(function(r) {
+    if (from && r.date < from) return false;
+    if (to && r.date > to) return false;
+    return true;
+  });
+}
+
+function setNzQuick(weeks) {
+  var allDates = [];
+  Object.values(nzData).forEach(function(arr) { arr.forEach(function(r) { allDates.push(r.date); }); });
+  allDates.sort();
+  if (!allDates.length) return;
+  var last = allDates[allDates.length-1];
+  document.getElementById("nzTo").value = last;
+  if (weeks===0) { document.getElementById("nzFrom").value = allDates[0]; }
+  else { var d=new Date(last); d.setDate(d.getDate()-weeks*7); document.getElementById("nzFrom").value=d.toISOString().slice(0,10); }
+  document.querySelectorAll(".qbtn").forEach(function(b){b.classList.remove("active");});
+  renderNz();
+}
+
+function renderNz() {
+  var geos = Object.keys(nzData);
+  if (!geos.length) return;
+
+  // 각 geo별 평균 계산
+  var geoAvgs = {};
+  geos.forEach(function(geo) {
+    var rows = getNzFiltered(geo);
+    if (!rows.length) { geoAvgs[geo] = 0; return; }
+    geoAvgs[geo] = rows.reduce(function(s,r){return s+r.val;},0)/rows.length;
+  });
+
+  var sorted = geos.slice().sort(function(a,b){return geoAvgs[b]-geoAvgs[a];});
+  var maxAvg = geoAvgs[sorted[0]] || 1;
+
+  // 히어로: Top 국가
+  var topGeo = sorted[0];
+  document.getElementById("nzTopCountry").textContent = GEO_NAMES[topGeo]||topGeo;
+  document.getElementById("nzTopSub").textContent = "관심도 지수 " + Math.round(geoAvgs[topGeo]/maxAvg*100);
+
+  // 히어로: 급상승
+  var riseGeo = null, riseRate = 0;
+  geos.forEach(function(geo) {
+    var rows = getNzFiltered(geo);
+    if (rows.length < 8) return;
+    var half = Math.floor(rows.length/2);
+    var recent = rows.slice(-Math.min(6,half));
+    var prev = rows.slice(-Math.min(12,rows.length), -Math.min(6,half));
+    var rAvg = recent.reduce(function(s,r){return s+r.val;},0)/recent.length;
+    var pAvg = prev.reduce(function(s,r){return s+r.val;},0)/prev.length;
+    if (rAvg < 10) return;
+    if (pAvg === 0) return;
+    var rate = (rAvg-pAvg)/pAvg*100;
+    if (rate > riseRate) { riseRate=rate; riseGeo=geo; }
+  });
+  if (riseGeo) {
+    document.getElementById("nzRiseCountry").textContent = GEO_NAMES[riseGeo]||riseGeo;
+    document.getElementById("nzRiseChange").textContent = "+" + Math.round(riseRate) + "%";
+  } else {
+    document.getElementById("nzRiseCountry").textContent = "—";
+    document.getElementById("nzRiseChange").textContent = "—";
+  }
+
+  // 히어로: 신규 감지
+  var newGeo = null, newRecent = 0, newPrev = 0;
+  geos.forEach(function(geo) {
+    var allRows = nzData[geo];
+    if (allRows.length < 12) return;
+    var recent4 = allRows.slice(-4);
+    var prev8 = allRows.slice(-12, -4);
+    var r4avg = recent4.reduce(function(s,r){return s+r.val;},0)/recent4.length;
+    var p8avg = prev8.reduce(function(s,r){return s+r.val;},0)/prev8.length;
+    if (p8avg <= 5 && r4avg >= 15) {
+      if (!newGeo || r4avg > newRecent) { newGeo=geo; newRecent=r4avg; newPrev=p8avg; }
+    }
+  });
+  if (newGeo) {
+    document.getElementById("nzNewCountry").textContent = GEO_NAMES[newGeo]||newGeo;
+    document.getElementById("nzNewSub").textContent = "최근 4주 평균 "+Math.round(newRecent)+" / 이전 8주 평균 "+Math.round(newPrev);
+  } else {
+    document.getElementById("nzNewCountry").textContent = "—";
+    document.getElementById("nzNewSub").textContent = "현재 감지된 국가 없음";
+  }
+
+  // 랭킹 Top 10
+  var top10 = sorted.slice(0,10);
+  var rankHtml = top10.map(function(geo, i) {
+    var pct = Math.round(geoAvgs[geo]/maxAvg*100);
+    return "<div class='rank-bar-item'>"
+      + "<span class='rank-bar-num'>"+(i+1)+"</span>"
+      + "<span class='rank-bar-name'>"+(GEO_NAMES[geo]||geo)+"</span>"
+      + "<div class='rank-bar-wrap'><div class='rank-bar-fill' style='width:"+pct+"%'></div></div>"
+      + "<span class='rank-bar-val'>"+pct+"</span>"
+      + "</div>";
+  }).join("");
+  document.getElementById("nzRanking").innerHTML = rankHtml;
+
+  // 칩
+  var nzPalette = ["#2563eb","#10b981","#f59e0b","#8b5cf6","#ef4444","#06b6d4","#f97316","#ec4899"];
+  var chipsHtml = nzActiveCountries.map(function(geo, i) {
+    var c = nzPalette[i%nzPalette.length];
+    var rmCall = "removeNzCountry(\'" + geo + "\')";
+    return '<span class="nz-chip" style="background:' + c + '18;border-color:' + c + ';color:' + c + '" onclick="' + rmCall + '">'
+      + (GEO_NAMES[geo]||geo)
+      + ' <span class="nz-chip-x">✕</span></span>';
+      + (GEO_NAMES[geo]||geo)
+      + " <span class=\"nz-chip-x\">✕</span></span>";
+  }).join("");
+  chipsHtml += "<span class=\"nz-chip-add\" onclick=\"openNzPanel()\">+ 국가 추가</span>";
+  document.getElementById("nzChips").innerHTML = chipsHtml;
+
+  // 차트
+  if (nzChartInst) { nzChartInst.destroy(); nzChartInst = null; }
+  // 공통 날짜축 (첫 번째 활성 국가 기준)
+  var baseGeo = nzActiveCountries[0] || geos[0];
+  var labels = getNzFiltered(baseGeo).map(function(r){return r.date;});
+  var datasets = nzActiveCountries.map(function(geo, i) {
+    var c = nzPalette[i%nzPalette.length];
+    var rows = getNzFiltered(geo);
+    var dateMap = {};
+    rows.forEach(function(r){ dateMap[r.date]=r.val; });
+    return {
+      label: GEO_NAMES[geo]||geo,
+      data: labels.map(function(d){ return dateMap[d]||0; }),
+      borderColor: c, backgroundColor: "transparent",
+      borderWidth: 1.8, pointRadius: labels.length>26?0:3,
+      pointHoverRadius: 5, tension: 0.4
+    };
+  });
+  var ctx = document.getElementById("nzChart").getContext("2d");
+  nzChartInst = new Chart(ctx, {
+    type:"line", data:{labels:labels, datasets:datasets},
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      interaction:{mode:"index",intersect:false},
+      plugins:{
+        legend:{display:true, labels:{color:"#6b7280",font:{size:10},boxWidth:10,padding:10}},
+        tooltip:{
+          backgroundColor:"#fff",borderColor:"#e8eaed",borderWidth:1,
+          titleColor:"#1a1a2e",bodyColor:"#6b7280",padding:10,
+          itemSort:function(a,b){return b.parsed.y-a.parsed.y;},
+          callbacks:{
+            label:function(ctx){return " "+ctx.dataset.label+": "+ctx.parsed.y.toFixed(1);},
+            labelColor:function(ctx){return{borderColor:ctx.dataset.borderColor,backgroundColor:ctx.dataset.borderColor,borderRadius:2};},
+            labelTextColor:function(ctx){return ctx.dataset.borderColor;}
+          }
+        }
+      },
+      scales:{
+        x:{ticks:{color:"#8a929e",font:{size:10},maxTicksLimit:8},grid:{color:"#f1f3f5"}},
+        y:{min:0,ticks:{color:"#8a929e",font:{size:10}},grid:{color:"#f1f3f5"},
+           title:{display:true,text:"Scaled Index",color:"#8a929e",font:{size:10}}}
+      }
+    }
+  });
+}
+
+function removeNzCountry(geo) {
+  nzActiveCountries = nzActiveCountries.filter(function(g){return g!==geo;});
+  renderNz();
+}
+
+// 국가 선택 패널
+var nzPanelGroups = {
+  "북미": [{"code":"US","name":"United States"},{"code":"CA","name":"Canada"}],
+  "동남아": [{"code":"PH","name":"Philippines"},{"code":"SG","name":"Singapore"},{"code":"MY","name":"Malaysia"},{"code":"TH","name":"Thailand"},{"code":"VN","name":"Vietnam"},{"code":"ID","name":"Indonesia"}],
+  "중동": [{"code":"AE","name":"UAE"},{"code":"SA","name":"Saudi Arabia"}],
+  "아시아": [{"code":"IN","name":"India"},{"code":"KR","name":"South Korea"},{"code":"JP","name":"Japan"}],
+  "라틴아메리카": [{"code":"MX","name":"Mexico"},{"code":"BR","name":"Brazil"}],
+  "유럽": [{"code":"GB","name":"United Kingdom"},{"code":"FR","name":"France"},{"code":"DE","name":"Germany"}],
+  "기타": [{"code":"AU","name":"Australia"},{"code":"GLOBAL","name":"Global"}]
+};
+
+function openNzPanel() {
+  buildNzPanel("");
+  document.getElementById("panelOverlay").classList.add("open");
+  document.getElementById("sidePanel").classList.add("open");
+  document.getElementById("panelSearch").value = "";
+  document.getElementById("panelSearch").oninput = function() { buildNzPanel(this.value); };
+  document.querySelector(".panel-title").textContent = "국가 선택";
+  document.querySelector(".btn-reset").onclick = function() {
+    nzActiveCountries = [];
+    buildNzPanel("");
+  };
+  document.querySelector(".btn-apply").textContent = "닫기";
+  document.querySelector(".btn-apply").onclick = function() {
+    closePanel();
+    renderNz();
+    // 원래 패널 복구
+    document.querySelector(".panel-title").textContent = "키워드 선택";
+    document.querySelector(".btn-apply").textContent = "닫기";
+  };
+}
+
+function buildNzPanel(query) {
+  var q = query.toLowerCase();
+  var box = document.getElementById("panelBody");
+  var html = "";
+  Object.keys(nzPanelGroups).forEach(function(region, ri) {
+    var items = nzPanelGroups[region].filter(function(c) {
+      return !q || c.name.toLowerCase().indexOf(q)>=0 || c.code.toLowerCase().indexOf(q)>=0;
+    });
+    if (!items.length) return;
+    var checkedCount = items.filter(function(c){return nzActiveCountries.indexOf(c.code)>=0;}).length;
+    var allChecked = checkedCount === items.length;
+    html += "<div class='panel-group'>"
+      + "<div class='panel-group-title'>" + region
+      + "<span class='panel-group-count'>"+checkedCount+"/"+items.length+"</span></div>"
+      + "<div class='panel-kw-list'>"
+      + "<div class='panel-kw-item' style='background:var(--bg);border-radius:6px;margin-bottom:4px' id='nzgrp_"+ri+"'>"
+      + "<input type='checkbox' id='nzchk_"+ri+"' "+(allChecked?"checked":"")+" style='cursor:pointer;accent-color:var(--accent);width:14px;height:14px'>"
+      + "<span class='panel-kw-label' style='font-weight:600;color:var(--accent)'>전체 선택</span></div>"
+      + items.map(function(c) {
+          var checked = nzActiveCountries.indexOf(c.code)>=0 ? "checked" : "";
+          var hasData = !!nzData[c.code];
+          return "<div class='panel-kw-item" + (hasData?"":" disabled") + "' id='nzkw_"+c.code+"'>"
+            + "<input type='checkbox' "+checked+" style='cursor:pointer;accent-color:var(--accent);width:14px;height:14px'>"
+            + '<span class="panel-kw-label">' + c.name + (hasData ? '' : ' <small style="color:var(--muted)">(데이터 없음)</small>') + '</span></div>';
+        }).join("")
+      + "</div></div>";
+  });
+  box.innerHTML = html || "<div style='padding:20px;text-align:center;color:var(--muted);font-size:12px'>검색 결과 없음</div>";
+
+  // 이벤트 바인딩
+  Object.keys(nzPanelGroups).forEach(function(region, ri) {
+    var items = nzPanelGroups[region].filter(function(c){return !q||c.name.toLowerCase().indexOf(q)>=0||c.code.toLowerCase().indexOf(q)>=0;});
+    var chk = document.getElementById("nzchk_"+ri);
+    if (chk) {
+      chk.addEventListener("change", function() {
+        var isOn = this.checked;
+        items.forEach(function(c) {
+          if (!nzData[c.code]) return;
+          if (isOn && nzActiveCountries.indexOf(c.code)<0) nzActiveCountries.push(c.code);
+          else if (!isOn) nzActiveCountries = nzActiveCountries.filter(function(g){return g!==c.code;});
+        });
+        buildNzPanel(q);
+        renderNz();
+      });
+    }
+    items.forEach(function(c) {
+      var el = document.getElementById("nzkw_"+c.code);
+      if (el && nzData[c.code]) {
+        el.addEventListener("click", function() {
+          var idx = nzActiveCountries.indexOf(c.code);
+          if (idx>=0) nzActiveCountries.splice(idx,1);
+          else nzActiveCountries.push(c.code);
+          buildNzPanel(q);
+          renderNz();
+        });
+      }
+    });
+  });
+  document.getElementById("panelCountNum").textContent = nzActiveCountries.length;
+}
+
+// ── END NUMBUZIN LOGIC ──────────────────────────────────
+
+function normalizeDate(v) {
+  if (!v) return "";
+  var s = String(v);
+  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+  var d = new Date(s);
+  return isNaN(d) ? s : d.toISOString().slice(0,10);
+}
+
+function loadData(mode) {
+  // brand는 도현님 데이터 사용
+  var url = mode === "brand" ? BRAND_URL : (APPS_URL + "?mode=" + mode);
+
+  fetch(url)
+    .then(function(r) { return r.json(); })
+    .then(function(json) {
+      if (json.error) throw new Error(json.error);
+
+      var rows;
+      if (mode === "brand") {
+        // 도현님 데이터: {geo, keyword, date, value} 형식
+        // wide 형식으로 변환: date+geo 기준으로 keyword를 컬럼으로
+        var dateGeoMap = {};
+        json.forEach(function(r) {
+          var date = normalizeDate(r.date);
+          var geo = r.geo || "GLOBAL";
+          var key = date + "||" + geo;
+          if (!dateGeoMap[key]) dateGeoMap[key] = { date: date, geo: geo, mode: "brand", run_at: date };
+          dateGeoMap[key][r.keyword] = r.value;
+        });
+        rows = Object.values(dateGeoMap).sort(function(a,b) { return a.date < b.date ? -1 : 1; });
+      } else {
+        rows = json.map(function(r) {
+          var out = {};
+          Object.keys(r).forEach(function(k) { out[k] = r[k]; });
+          out.date = normalizeDate(r.date);
+          return out;
+        }).filter(function(r) { return r.date; })
+          .sort(function(a,b) { return a.date < b.date ? -1 : 1; });
+      }
+
+      state.data[mode] = rows;
+      state.keywords[mode] = Object.keys(rows[0]||{}).filter(function(k) { return !ID_COLS[k]; });
+      state.group[mode] = "전체";
+      if (mode === "skin") {
+        var dates = rows.map(function(r) { return r.date; });
+        document.getElementById("dateFrom").value = dates[0];
+        document.getElementById("dateTo").value = dates[dates.length-1];
+      }
+      setTop5(mode);
+      buildTabs(mode);
+      render();
+    })
+    .catch(function(e) {
+      document.getElementById("rankingRow").innerHTML =
+        "<div class='state-msg'><strong>로드 실패</strong>" + e.message + "<br><small>Colab에서 먼저 데이터를 수집해주세요.</small></div>";
+    });
+}
+
+function getFiltered() {
+  var mode = state.mode;
+  var geo = document.getElementById("geoSel").value;
+  var from = document.getElementById("dateFrom").value;
+  var to = document.getElementById("dateTo").value;
+  return (state.data[mode]||[]).filter(function(r) {
+    // brand는 도현님 데이터 — geo 필터 적용하되 GLOBAL이면 전체
+    if (mode === "brand") {
+      if (geo !== "GLOBAL" && (r.geo||"") !== geo) return false;
+    } else {
+      if ((r.geo||"GLOBAL") !== geo) return false;
+    }
+    if (from && r.date < from) return false;
+    if (to && r.date > to) return false;
+    return true;
+  });
+}
+
+function setTop5(mode) {
+  var rows = getFiltered();
+  var kws = state.keywords[mode]||[];
+  var fixed = MODES[mode].fixed;
+  if (!rows.length || !kws.length) { state.active[mode] = {}; return; }
+  var avgs = {};
+  kws.forEach(function(kw) {
+    avgs[kw] = rows.reduce(function(s,r) { return s+(parseFloat(r[kw])||0); },0)/rows.length;
+  });
+  var sorted = kws.slice().sort(function(a,b) { return avgs[b]-avgs[a]; });
+  var top5 = sorted.slice(0,5);
+  if (fixed && top5.indexOf(fixed)<0) { top5 = [fixed].concat(top5.slice(0,4)); }
+  var act = {};
+  top5.forEach(function(k) { act[k]=1; });
+  state.active[mode] = act;
+}
+
+function buildTabs(mode) {
+  var box = document.getElementById("groupTabs");
+  var groups = MODES[mode].groups;
+  box.innerHTML = Object.keys(groups).map(function(g) {
+    return "<span class='gtab" + (g==="전체"?" active":"") + "' onclick=\"selectGroup('" + g + "')\">" + g + "</span>";
+  }).join("");
+}
+
+function selectGroup(g) {
+  var mode = state.mode;
+  state.group[mode] = g;
+  var kwList = MODES[mode].groups[g];
+  var kws = state.keywords[mode]||[];
+  var fixed = MODES[mode].fixed;
+  var groupKws = kwList ? kwList.filter(function(k) { return kws.indexOf(k)>=0; }) : kws;
+  var rows = getFiltered();
+  var avgs = {};
+  groupKws.forEach(function(kw) {
+    avgs[kw] = rows.reduce(function(s,r) { return s+(parseFloat(r[kw])||0); },0)/(rows.length||1);
+  });
+  var sorted = groupKws.slice().sort(function(a,b) { return avgs[b]-avgs[a]; });
+  var top5 = sorted.slice(0,5);
+  if (fixed && top5.indexOf(fixed)<0) { top5 = [fixed].concat(top5.slice(0,4)); }
+  var act = {};
+  top5.forEach(function(k) { act[k]=1; });
+  state.active[mode] = act;
+  document.querySelectorAll(".gtab").forEach(function(el) {
+    el.className = "gtab"+(el.textContent===g?" active":"");
+  });
+  render();
+}
+
+function getScale(rows, kws) {
+  var max = 0;
+  kws.forEach(function(kw) {
+    rows.forEach(function(r) { var v=parseFloat(r[kw])||0; if(v>max) max=v; });
+  });
+  return max>0 ? 100/max : 1;
+}
+
+function render() {
+  var mode = state.mode;
+  var rows = getFiltered();
+  var kws = state.keywords[mode]||[];
+  var act = state.active[mode]||{};
+  var activeKws = kws.filter(function(k) { return act[k]; });
+
+  document.getElementById("noDataBar").style.display = rows.length ? "none" : "flex";
+  if (rows.length) {
+    document.getElementById("subtitle").textContent = rows[0].date + " → " + rows[rows.length-1].date + " · " + document.getElementById("geoSel").value;
+    document.getElementById("footer").textContent = "마지막 업데이트: " + (rows[rows.length-1].run_at||"-");
+  }
+
+  // Ranking (항상 Top 5 고정)
+  var rankBox = document.getElementById("rankingRow");
+  if (!rows.length) { rankBox.innerHTML = "<div class='state-msg'>데이터 없음</div>"; return; }
+
+  var scale = getScale(rows, kws);
+  var totals = {};
+  kws.forEach(function(kw) {
+    totals[kw] = rows.reduce(function(s,r) { return s+(parseFloat(r[kw])||0)*scale; },0)/rows.length;
+  });
+  var grand = kws.reduce(function(s,k) { return s+totals[k]; },0);
+  var top5sorted = kws.map(function(kw) {
+    return { kw:kw, pct: grand>0 ? Math.round(totals[kw]/grand*100) : 0 };
+  }).sort(function(a,b) { return b.pct-a.pct; }).slice(0,5);
+
+  rankBox.innerHTML = top5sorted.map(function(item, i) {
+    var c = PALETTE[kws.indexOf(item.kw)%PALETTE.length];
+    return "<div class='rank-card'>"
+      + "<div class='rank-num' style='background:"+c+"'>"+(i+1)+"</div>"
+      + "<div style='flex:1;min-width:0'>"
+      + "<div class='rank-kw'>"+item.kw+"</div>"
+      + "<div class='rank-pct' style='color:"+c+"'>"+item.pct+"%</div>"
+      + "</div></div>";
+  }).join("");
+
+  // Signal (2줄)
+  var sigBox = document.getElementById("signalList");
+  var signals = [];
+  if (top5sorted.length>=2) {
+    var t=top5sorted[0], s2=top5sorted[1];
+    signals.push((t.pct-s2.pct)>15
+      ? t.kw+"가 "+t.pct+"%로 1위, 2위 "+s2.kw+"과 격차가 큼"
+      : "1위 "+t.kw+"("+t.pct+"%)와 2위 "+s2.kw+"("+s2.pct+"%) 간 격차 좁음");
+  }
+  var cats = {"트러블·유분":["acne","pimples","blackheads","oily skin","large pores"], "수분":["dry skin","dehydrated skin","skin barrier"], "민감":["sensitive skin","redness","rosacea","eczema"]};
+  var catNames = Object.keys(cats);
+  var found = [];
+  catNames.forEach(function(cn) {
+    var cnt = top5sorted.filter(function(x) { return cats[cn].indexOf(x.kw)>=0; }).length;
+    if (cnt>=2) found.push(cn);
+  });
+  if (found.length) signals.push("Top 5 내 "+found.join("·")+" 관련 키워드가 집중됨");
+  sigBox.innerHTML = signals.slice(0,2).map(function(s) {
+    return "<div class='signal-item'><span style='color:var(--muted)'>•</span><span>"+s+"</span></div>";
+  }).join("");
+
+  // Chips (선택된 것만)
+  var chipsRow = document.getElementById("chipsRow");
+  var fixed = MODES[mode].fixed;
+  var html = "";
+  activeKws.forEach(function(kw) {
+    var c = PALETTE[kws.indexOf(kw)%PALETTE.length];
+    var isFixed = kw === fixed;
+    html += "<span class='chip' style='background:"+c+"18;border-color:"+c+";color:"+c+"' "
+      + (isFixed ? "" : "onclick=\"removeKw('"+kw+"')\"") + ">"
+      + "<span class='chip-dot' style='background:"+c+"'></span>"
+      + kw
+      + (isFixed ? " 📌" : " <span class='chip-x'>✕</span>")
+      + "</span>";
+  });
+  html += "<span class='chip-add' onclick='openPanel()'>+ 키워드 선택</span>";
+  chipsRow.innerHTML = html;
+
+  // Chart
+  if (chartInst) { chartInst.destroy(); chartInst = null; }
+  var chartScale = getScale(rows, activeKws);
+  var ctx = document.getElementById("mainChart").getContext("2d");
+  chartInst = new Chart(ctx, {
+    type: "line",
+    data: {
+      labels: rows.map(function(r) { return r.date; }),
+      datasets: activeKws.map(function(kw) {
+        var c = PALETTE[kws.indexOf(kw)%PALETTE.length];
+        return {
+          label: kw,
+          data: rows.map(function(r) { return Math.round((parseFloat(r[kw])||0)*chartScale*10)/10; }),
+          borderColor: c, backgroundColor: "transparent",
+          borderWidth: kw===fixed?2.5:1.6,
+          pointRadius: rows.length>26?0:2, pointHoverRadius:5, tension:0.4
+        };
+      })
+    },
+    options: {
+      responsive:true, maintainAspectRatio:false,
+      interaction:{mode:"index",intersect:false},
+      plugins:{
+        legend:{display:false},
+        tooltip:{
+          backgroundColor:"#fff", borderColor:"#e8eaed", borderWidth:1,
+          titleColor:"#1a1a2e", bodyColor:"#6b7280", padding:10,
+          itemSort:function(a,b){return b.parsed.y-a.parsed.y;},
+          callbacks:{
+            label:function(ctx){
+              var ds=ctx.chart.data.datasets;
+              var vals=ds.map(function(d){return{label:d.label,val:d.data[ctx.dataIndex]||0};}).sort(function(a,b){return b.val-a.val;});
+              var rank=vals.findIndex(function(d){return d.label===ctx.dataset.label;})+1;
+              return " "+rank+". "+ctx.dataset.label+": "+ctx.parsed.y.toFixed(1);
+            },
+            labelColor:function(ctx){return{borderColor:ctx.dataset.borderColor,backgroundColor:ctx.dataset.borderColor,borderRadius:2};},
+            labelTextColor:function(ctx){return ctx.dataset.borderColor;}
+          }
+        }
+      },
+      scales:{
+        x:{ticks:{color:"#8a929e",font:{size:10},maxTicksLimit:10},grid:{color:"#f1f3f5"}},
+        y:{min:0,max:100,ticks:{color:"#8a929e",font:{size:10}},grid:{color:"#f1f3f5"},
+           title:{display:true,text:"Scaled Index",color:"#8a929e",font:{size:10}}}
+      }
+    }
+  });
+}
+
+function removeKw(kw) {
+  var mode = state.mode;
+  delete state.active[mode][kw];
+  render();
+}
+
+// Panel
+function openPanel() {
+  var mode = state.mode;
+  var kws = state.keywords[mode]||[];
+  var act = state.active[mode]||{};
+  panelTempActive = {};
+  Object.keys(act).forEach(function(k) { panelTempActive[k]=1; });
+  buildPanelList(kws, "");
+  document.getElementById("panelSearch").value = "";
+  document.getElementById("panelOverlay").classList.add("open");
+  document.getElementById("sidePanel").classList.add("open");
+  updatePanelCount();
+}
+
+function closePanel() {
+  document.getElementById("panelOverlay").classList.remove("open");
+  document.getElementById("sidePanel").classList.remove("open");
+}
+
+function buildPanelList(kws, query) {
+  var mode = state.mode;
+  var cfg = MODES[mode];
+  var panelGroups = cfg.panelGroups || {};
+  var box = document.getElementById("panelBody");
+  var q = query.toLowerCase();
+
+  if (!Object.keys(panelGroups).length) {
+    var filtered = kws.filter(function(k) { return !q || k.toLowerCase().indexOf(q)>=0; });
+    var allChecked = filtered.length > 0 && filtered.every(function(k) { return panelTempActive[k]; });
+    var html = "<div class='panel-group'>"
+      + "<div class='panel-kw-item' style='background:var(--bg);border-radius:6px;margin-bottom:4px' id='grpAll_all'>"
+      + "<input type='checkbox' id='chk_grp_all' " + (allChecked?"checked":"") + " style='cursor:pointer;accent-color:var(--accent);width:14px;height:14px'>"
+      + "<span class='panel-kw-label' style='font-weight:600;color:var(--accent)'>전체 선택</span></div>"
+      + filtered.map(function(kw) {
+          var checked = panelTempActive[kw] ? "checked" : "";
+          return "<div class='panel-kw-item' id='pkw_" + kw.replace(/[^a-zA-Z0-9]/g,'_') + "'>"
+            + "<input type='checkbox' " + checked + " style='cursor:pointer;accent-color:var(--accent);width:14px;height:14px'>"
+            + "<span class='panel-kw-label'>"+kw+"</span></div>";
+        }).join("")
+      + "</div>";
+    box.innerHTML = html;
+    // 이벤트 바인딩
+    document.getElementById("chk_grp_all").addEventListener("change", function() {
+      filtered.forEach(function(kw) {
+        if (this.checked) panelTempActive[kw]=1;
+        else delete panelTempActive[kw];
+      }.bind(this));
+      applyTempAndRender();
+    });
+    filtered.forEach(function(kw) {
+      var id = "pkw_" + kw.replace(/[^a-zA-Z0-9]/g,'_');
+      var el = document.getElementById(id);
+      if (el) el.addEventListener("click", function() { togglePanelKw(kw); });
+    });
+    return;
+  }
+
+  var html = "";
+  var gNames = Object.keys(panelGroups);
+  gNames.forEach(function(gName, gi) {
+    var items = panelGroups[gName].filter(function(k) { return !q || k.toLowerCase().indexOf(q)>=0; });
+    if (!items.length) return;
+    var checkedCount = items.filter(function(k) { return panelTempActive[k]; }).length;
+    var allChecked = checkedCount === items.length;
+    var safeG = "g"+gi;
+    html += "<div class='panel-group'>"
+      + "<div class='panel-group-title'>" + gName
+      + "<span class='panel-group-count'>" + checkedCount + "/" + items.length + "</span></div>"
+      + "<div class='panel-kw-list'>"
+      + "<div class='panel-kw-item' style='background:var(--bg);border-radius:6px;margin-bottom:4px' id='grpsel_"+safeG+"'>"
+      + "<input type='checkbox' id='chk_"+safeG+"' " + (allChecked?"checked":"") + " style='cursor:pointer;accent-color:var(--accent);width:14px;height:14px'>"
+      + "<span class='panel-kw-label' style='font-weight:600;color:var(--accent)'>전체 선택</span></div>"
+      + items.map(function(kw) {
+          var checked = panelTempActive[kw] ? "checked" : "";
+          var safeKw = kw.replace(/[^a-zA-Z0-9]/g,'_');
+          return "<div class='panel-kw-item' id='pkw_"+safeG+"_"+safeKw+"'>"
+            + "<input type='checkbox' " + checked + " style='cursor:pointer;accent-color:var(--accent);width:14px;height:14px'>"
+            + "<span class='panel-kw-label'>"+kw+"</span></div>";
+        }).join("")
+      + "</div></div>";
+  });
+  box.innerHTML = html || "<div style='padding:20px;text-align:center;color:var(--muted);font-size:12px'>검색 결과 없음</div>";
+
+  // 이벤트 바인딩 (렌더 후)
+  gNames.forEach(function(gName, gi) {
+    var items = panelGroups[gName].filter(function(k) { return !q || k.toLowerCase().indexOf(q)>=0; });
+    if (!items.length) return;
+    var safeG = "g"+gi;
+    var chk = document.getElementById("chk_"+safeG);
+    if (chk) {
+      chk.addEventListener("change", function() {
+        var isChecked = this.checked;
+        items.forEach(function(kw) {
+          if (isChecked) panelTempActive[kw]=1;
+          else delete panelTempActive[kw];
+        });
+        applyTempAndRender();
+      });
+    }
+    items.forEach(function(kw) {
+      var safeKw = kw.replace(/[^a-zA-Z0-9]/g,'_');
+      var el = document.getElementById("pkw_"+safeG+"_"+safeKw);
+      if (el) el.addEventListener("click", function() { togglePanelKw(kw); });
+    });
+  });
+}
+
+function applyTempAndRender() {
+  var mode = state.mode;
+  state.active[mode] = {};
+  Object.keys(panelTempActive).forEach(function(k) { state.active[mode][k]=1; });
+  var kws = state.keywords[mode]||[];
+  buildPanelList(kws, document.getElementById("panelSearch").value);
+  updatePanelCount();
+  render();
+}
+
+function togglePanelKw(kw) {
+  var mode = state.mode;
+  var fixed = MODES[mode].fixed;
+  if (kw === fixed) return;
+  if (panelTempActive[kw]) {
+    delete panelTempActive[kw];
+  } else {
+    if (Object.keys(panelTempActive).length >= MAX_KW) return;
+    panelTempActive[kw] = 1;
+  }
+  // 즉시 state에 반영
+  state.active[mode] = {};
+  Object.keys(panelTempActive).forEach(function(k) { state.active[mode][k]=1; });
+  var kws = state.keywords[mode]||[];
+  buildPanelList(kws, document.getElementById("panelSearch").value);
+  updatePanelCount();
+  render();
+}
+
+function updatePanelCount() {
+  document.getElementById("panelCountNum").textContent = Object.keys(panelTempActive).length;
+}
+
+function filterPanelList() {
+  var mode = state.mode;
+  var kws = state.keywords[mode]||[];
+  buildPanelList(kws, document.getElementById("panelSearch").value);
+}
+
+function toggleGroupAll(gName, items) {
+  var mode = state.mode;
+  var fixed = MODES[mode].fixed;
+  var allChecked = items.every(function(k) { return panelTempActive[k]; });
+  items.forEach(function(kw) {
+    if (kw === fixed) return;
+    if (allChecked) { delete panelTempActive[kw]; }
+    else { panelTempActive[kw] = 1; }
+  });
+  state.active[mode] = {};
+  Object.keys(panelTempActive).forEach(function(k) { state.active[mode][k]=1; });
+  var kws = state.keywords[mode]||[];
+  buildPanelList(kws, document.getElementById("panelSearch").value);
+  updatePanelCount();
+  render();
+}
+
+function resetPanel() {
+  var mode = state.mode;
+  panelTempActive = {};
+  var fixed = MODES[mode].fixed;
+  if (fixed) panelTempActive[fixed] = 1;
+  var kws = state.keywords[mode]||[];
+  buildPanelList(kws, "");
+  updatePanelCount();
+}
+
+function applyPanel() {
+  closePanel();
+}
+
+function setQuick(weeks) {
+  var mode = state.mode;
+  var rows = state.data[mode]||[];
+  var dates = rows.map(function(r){return r.date;}).sort();
+  if (!dates.length) return;
+  var last = dates[dates.length-1];
+  document.getElementById("dateTo").value = last;
+  if (weeks===0) { document.getElementById("dateFrom").value = dates[0]; }
+  else {
+    var d = new Date(last);
+    d.setDate(d.getDate()-weeks*7);
+    document.getElementById("dateFrom").value = d.toISOString().slice(0,10);
+  }
+  document.querySelectorAll(".qbtn").forEach(function(b){b.classList.remove("active");});
+  if (weeks===0) document.getElementById("btnAll").classList.add("active");
+  setTop5(mode);
+  render();
+}
+
+function onFilterChange() { setTop5(state.mode); render(); }
+function onDateChange() {
+  document.querySelectorAll(".qbtn").forEach(function(b){b.classList.remove("active");});
+  setTop5(state.mode);
+  render();
+}
+
+function dlChart() {
+  var a = document.createElement("a");
+  a.href = document.getElementById("mainChart").toDataURL("image/png");
+  a.download = state.mode+"-trends.png";
+  a.click();
+}
+
+loadData("skin");
+</script>
+</body>
+</html>
